@@ -17,7 +17,7 @@ controller.addUser = async (socket, data) => {
     });
   } catch (err) {
     logger.error(`Error in save user- ${err}`);
-    socket.emit('error', {
+    socket.emit('error_emit', {
       type: 'error with addUser',
     });
   }
