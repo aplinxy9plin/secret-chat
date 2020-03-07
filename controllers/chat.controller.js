@@ -4,6 +4,13 @@ import logger from '../core/logger';
 const controller = {};
 
 controller.createChat = async (socket, data) => {
+  if (data.userId1 == null || data.userId2 == null) {
+    logger.error('Error in create chat- One of user Id\'s is null');
+    socket.emit('error_emit', {
+      type: 'error with createChat',
+    });
+  }
+
   const chatToCreate = Chat({
     messages: [],
     users: [data.userId1, data.userId2],

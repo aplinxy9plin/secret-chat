@@ -11,7 +11,6 @@ const routes = (socket, data) => {
       userController.getChats(socket, result);
       break;
     case 'createChat':
-      //Проверка есть ли такие _id в Users
       chatController.createChat(socket, result);
       break;
     default:
