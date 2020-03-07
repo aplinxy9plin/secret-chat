@@ -1,33 +1,41 @@
 import Chat from '../models/chat.model';
+import User from '../models/user.model';
 import logger from '../core/logger';
 
 const controller = {};
 
 controller.createChat = async (socket, data) => {
-  if (data.userId1 == null || data.userId2 == null) {
-    logger.error('Error in create chat- One of user Id\'s is null');
+  if (!data.userId1 || !data.userId2 || data.userId1 === data.userId2) {
+    logger.error('Error in create chat- One of user Id\'s is null or equal');
     socket.emit('error_emit', {
       type: 'error with createChat',
     });
-  }
-
-  const chatToCreate = Chat({
-    messages: [],
-    users: [data.userId1, data.userId2],
-  });
-
-  try {
-    const createdChat = await Chat.createChat(chatToCreate);
-    logger.info('Creating chat...');
-    socket.emit('newChat', {
-      type: 'success',
-      result: createdChat,
+  } else {
+    const chatToCreate = Chat({
+      messages: [],
+      users: [data.userId1, data.userId2],
     });
-  } catch (err) {
-    logger.error(`Error in create chat- ${err}`);
-    socket.emit('error_emit', {
-      type: 'error with createChat',
-    });
+    try {
+      const user = await User.getUser(data.userId1);
+      if (user) {
+        const createdChat = await Chat.createChat(chatToCreate);
+        logger.info('Creating chat...');
+        socket.emit('newChat', {
+          type: 'success',
+          result: createdChat,
+        });
+      } else {
+        logger.error('Error in create chat, userId is undefined');
+        socket.emit('error_emit', {
+          type: 'error with createChat',
+        });
+      }
+    } catch (err) {
+      logger.error(`Error in create chat- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with createChat',
+      });
+    }
   }
 };
 

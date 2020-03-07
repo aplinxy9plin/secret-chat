@@ -11,4 +11,6 @@ UserModel.addUser = (userToAdd) => userToAdd.save();
 
 UserModel.getChats = (userId) => UserModel.findOne({ userId }, { _id: 0, chatList: 1 });
 
+UserModel.getUser = (userId) => UserModel.findOne({ userId });
+
 export default UserModel;
