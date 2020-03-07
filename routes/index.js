@@ -6,6 +6,9 @@ const routes = (socket, data) => {
     case 'newUser':
       userController.addUser(socket, result);
       break;
+    case 'getChats':
+      userController.getChats(socket, result);
+      break;
     default:
       break;
   }

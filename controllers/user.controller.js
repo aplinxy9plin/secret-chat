@@ -23,4 +23,20 @@ controller.addUser = async (socket, data) => {
   }
 };
 
+controller.getChats = async (socket, data) => {
+  try {
+    const chats = await User.getChats(data.vk_user_id);
+    logger.info('Getting chats...');
+    socket.emit('getChats', {
+      type: 'success',
+      result: chats,
+    });
+  } catch (err) {
+    logger.error(`Error in save user- ${err}`);
+    socket.emit('error_emit', {
+      type: 'error with getChats',
+    });
+  }
+};
+
 export default controller;
