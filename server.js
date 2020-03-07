@@ -36,7 +36,6 @@ io.on('connection', (socket) => {
           ordered[key] = urlParams[key];
         }
       });
-      console.log(ordered);
       const stringParams = qs.stringify(ordered);
       const paramsHash = crypto
         .createHmac('sha256', config.secretKey)
@@ -46,7 +45,6 @@ io.on('connection', (socket) => {
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
         .replace(/=$/, '');
-      console.log(paramsHash, urlParams.sign);
       if (paramsHash === urlParams.sign.slice(0, urlParams.sign.length - 1)) {
         routes(socket, data);
       } else {
