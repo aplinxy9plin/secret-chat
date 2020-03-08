@@ -13,6 +13,9 @@ const routes = (socket, data) => {
     case 'createChat':
       chatController.createChat(socket, result);
       break;
+    case 'addMessage':
+      chatController.addMessage(socket, result);
+      break;
     default:
       break;
   }
