@@ -16,6 +16,9 @@ const routes = (socket, data) => {
     case 'addMessage':
       chatController.addMessage(socket, result);
       break;
+    case 'getMessages':
+      console.log(chatController.getMessages(socket, result));
+      break;
     default:
       break;
   }

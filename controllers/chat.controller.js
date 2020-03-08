@@ -67,4 +67,27 @@ controller.addMessage = async (socket, data) => {
     }
   }
 };
+
+controller.getMessages = async (socket, data) => {
+  if (!data.chatId) {
+    logger.error('Error in get messaget- chat id is null');
+    socket.emit('error_emit', {
+      type: 'error with getMessages',
+    });
+  } else {
+    try {
+      const messages = await Chat.getMessages(data.chatId);
+      logger.info('Getting messages...');
+      socket.emit('getMessages', {
+        type: 'success',
+        result: messages,
+      });
+    } catch (err) {
+      logger.error(`Error in get messages- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with getMessages',
+      });
+    }
+  }
+};
 export default controller;
