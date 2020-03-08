@@ -1,6 +1,6 @@
 import userController from '../controllers/user.controller';
 import chatController from '../controllers/chat.controller';
-import attachmentController from '../controllers/attachment.controller'
+import attachmentController from '../controllers/attachment.controller';
 
 const routes = (socket, data) => {
   const result = JSON.parse(data.data[1]);

@@ -5,7 +5,7 @@ const AttachmentsSchema = mongoose.Schema({
   type: { type: String, enum: ['Image', 'Doc', 'Video'], required: true },
 }, { collection: 'attachments' });
 
-const AttachmentModel = mongoose.model('attachment', AttachmentsSchema);
+const AttachmentModel = mongoose.model('attachments', AttachmentsSchema);
 
 AttachmentModel.addAttachment = (attachmentToAdd) => attachmentToAdd.save();
 
