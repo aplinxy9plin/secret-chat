@@ -1,5 +1,6 @@
 import userController from '../controllers/user.controller';
 import chatController from '../controllers/chat.controller';
+import attachmentController from '../controllers/attachment.controller';
 
 const routes = (socket, data) => {
   const result = JSON.parse(data.data[1]);
@@ -13,8 +14,17 @@ const routes = (socket, data) => {
     case 'createChat':
       chatController.createChat(socket, result);
       break;
-    case 'addMessage':
-      chatController.addMessage(socket, result);
+    case 'sendMessage':
+      chatController.sendMessage(socket, result);
+      break;
+    case 'getMessages':
+      chatController.getMessages(socket, result);
+      break;
+    case 'addAttachment':
+      attachmentController.addAttachment(socket, result);
+      break;
+    case 'getAttachment':
+      attachmentController.getAttachment(socket, result);
       break;
     default:
       break;

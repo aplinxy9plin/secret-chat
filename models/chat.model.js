@@ -16,8 +16,11 @@ const ChatModel = mongoose.model('chats', ChatSchema);
 
 ChatModel.createChat = (chatToCreate) => chatToCreate.save();
 
-ChatModel.addMessage = (_id, message) => ChatModel.update(
+ChatModel.sendMessage = (_id, message) => ChatModel.update(
   { _id }, { $push: { messages: message } },
 );
+
+ChatModel.getMessages = (_id) => ChatModel.findOne({ _id }, '-users -_id');
+
 
 export default ChatModel;

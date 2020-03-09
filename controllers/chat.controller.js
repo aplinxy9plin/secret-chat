@@ -39,30 +39,53 @@ controller.createChat = async (socket, data) => {
   }
 };
 
-controller.addMessage = async (socket, data) => {
+controller.sendMessage = async (socket, data) => {
   if (!data.chatId || !data.message) {
-    logger.error('Error in add message- chat id or message is null');
+    logger.error('Error in send message- chat id or message is null');
     socket.emit('error_emit', {
-      type: 'error with addMessage',
+      type: 'error with sendMessage',
     });
   } else if (!data.message.sender || !data.message.visible
     || !data.message.date || !data.message.type) {
-    logger.error('Error in add message- One of required message fields is null');
+    logger.error('Error in send message- One of required message fields is null');
     socket.emit('error_emit', {
-      type: 'error with addMessage',
+      type: 'error with sendMessage',
     });
   } else {
     try {
-      const newMessage = await Chat.addMessage(data.chatId, data.message);
-      logger.info('Adding message...');
-      socket.emit('addMessage', {
+      const newMessage = await Chat.sendMessage(data.chatId, data.message);
+      logger.info('Sending message...');
+      socket.emit('sendMessage', {
         type: 'success',
         result: newMessage,
       });
     } catch (err) {
-      logger.error(`Error in add message- ${err}`);
+      logger.error(`Error in send message- ${err}`);
       socket.emit('error_emit', {
-        type: 'error with addMessage',
+        type: 'error with sendMessage',
+      });
+    }
+  }
+};
+
+controller.getMessages = async (socket, data) => {
+  if (!data.chatId) {
+    logger.error('Error in get messaget- chat id is null');
+    socket.emit('error_emit', {
+      type: 'error with getMessages',
+    });
+  } else {
+    try {
+      const messages = await Chat.getMessages(data.chatId);
+      logger.info('Getting messages...');
+      socket.emit('getMessages', {
+        type: 'success',
+        result: messages,
+      });
+    } catch (err) {
+      logger.error(`Error in get messages- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with getMessages',
       });
     }
   }
