@@ -22,5 +22,12 @@ ChatModel.sendMessage = (_id, message) => ChatModel.update(
 
 ChatModel.getMessages = (_id) => ChatModel.findOne({ _id }, '-users -_id');
 
+ChatModel.sendMessage = (_id, message) => ChatModel.update(
+  { _id }, { $push: { messages: message } },
+);
+
+ChatModel.sendMessage = (_id, _messageid) => ChatModel.update(
+  { _id }, { messages: { $pop: _messageid } },
+);
 
 export default ChatModel;

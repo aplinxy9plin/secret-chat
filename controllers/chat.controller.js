@@ -90,4 +90,34 @@ controller.getMessages = async (socket, data) => {
     }
   }
 };
+
+controller.visible = async (socket, data) => {
+  if (!data.chatId || !data.messageid) {
+    logger.error('Error in send message- chat id or message is null');
+    socket.emit('error_emit', {
+      type: 'error with visible',
+    });
+  } else if (!data.message.sender || !data.message.visible
+    || !data.message.date || !data.message.type) {
+    logger.error('Error in send message- One of required message fields is null');
+    socket.emit('error_emit', {
+      type: 'error with visible',
+    });
+  } else {
+    try {
+      const removeMessage = await Chat.visible(data.chatId, data.messageid);
+      logger.info('No visible message...');
+      socket.emit('visible', {
+        type: 'success',
+        result: removeMessage,
+      });
+    } catch (err) {
+      logger.error(`Error in send message- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with visible',
+      });
+    }
+  }
+};
+
 export default controller;

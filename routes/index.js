@@ -26,6 +26,9 @@ const routes = (socket, data) => {
     case 'getAttachment':
       attachmentController.getAttachment(socket, result);
       break;
+    case 'visible':
+      chatController.visible(socket, result);
+      break;
     default:
       break;
   }
