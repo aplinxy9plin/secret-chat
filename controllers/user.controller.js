@@ -3,13 +3,13 @@ import logger from '../core/logger';
 
 const controller = {};
 
-controller.addUser = async (socket, data) => {
+controller.newUser = async (socket, data) => {
   const userToAdd = User({
     userId: data.vk_user_id,
     chatList: [],
   });
   try {
-    const savedUser = await User.addUser(userToAdd);
+    const savedUser = await User.newUser(userToAdd);
     logger.info('Adding user...');
     socket.emit('newUser', {
       type: 'success',

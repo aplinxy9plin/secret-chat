@@ -20,7 +20,7 @@ controller.createChat = async (socket, data) => {
       if (user) {
         const createdChat = await Chat.createChat(chatToCreate);
         logger.info('Creating chat...');
-        socket.emit('newChat', {
+        socket.emit('createChat', {
           type: 'success',
           result: createdChat,
         });
@@ -90,4 +90,28 @@ controller.getMessages = async (socket, data) => {
     }
   }
 };
+
+controller.removeMessage = async (socket, data) => {
+  if (!data.chatId || !data.messageId) {
+    logger.error('Error in send message- chat id or message is null');
+    socket.emit('error_emit', {
+      type: 'error with visible',
+    });
+  } else {
+    try {
+      const removeMessage = await Chat.removeMessage(data.chatId, data.messageId);
+      logger.info('No visible message...');
+      socket.emit('removeMessage', {
+        type: 'success',
+        result: removeMessage,
+      });
+    } catch (err) {
+      logger.error(`Error in send message- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with visible',
+      });
+    }
+  }
+};
+
 export default controller;
