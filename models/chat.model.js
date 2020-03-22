@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 
 const ChatSchema = mongoose.Schema({
   messages: [{
-    type: { type: String, required: true },
+    type: { type: String, enum: ['text', 'document'], required: true },
     text: { type: String },
-    sender: { type: Number },
+    sender: { type: String },
     date: { type: Date, required: true },
     visible: { type: Boolean, required: true },
     documents: { type: mongoose.Schema.Types.ObjectId, ref: 'documents' },

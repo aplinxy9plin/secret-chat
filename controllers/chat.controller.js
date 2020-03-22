@@ -1,8 +1,26 @@
 import Chat from '../models/chat.model';
 import User from '../models/user.model';
+import ChatArchive from '../models/chatArchive.model';
 import logger from '../core/logger';
 
 const controller = {};
+
+const messageTypes = ['text', 'document'];
+
+function messagesToArchiveType(messages) {
+  const archiveMessages = [];
+  messages.forEach((message) => {
+    const mainSender = messages[0].sender;
+    archiveMessages.push({
+      type: message.type,
+      text: message.text,
+      date: message.date,
+      documents: message.documents,
+      sender: message.sender === mainSender ? '1' : '2',
+    });
+  });
+  return archiveMessages;
+}
 
 controller.createChat = async (socket, data) => {
   if (!data.userId1 || !data.userId2 || data.userId1 === data.userId2) {
@@ -46,8 +64,13 @@ controller.sendMessage = async (socket, data) => {
       type: 'error with sendMessage',
     });
   } else if (!data.message.sender || !data.message.visible
-    || !data.message.date || !data.message.type) {
+    || !data.message.date || !data.message.type || !messageTypes.includes(data.message.type)) {
     logger.error('Error in send message- One of required message fields is null');
+    socket.emit('error_emit', {
+      type: 'error with sendMessage',
+    });
+  } else if (!messageTypes.includes(data.message.type)) {
+    logger.error('Error in send message- unexpected message type');
     socket.emit('error_emit', {
       type: 'error with sendMessage',
     });
@@ -151,23 +174,47 @@ controller.userLeftChat = async (socket, data) => {
         type: 'success',
         result: userLeftChatResult,
       });
-      const usersState = await Chat.getUsersState(data.chatId);
-      let isChatOnDelete = true;
-      usersState.users.forEach((userInfo) => {
-        if (userInfo.isInChat) {
-          isChatOnDelete = false;
-        }
-      });
-      if (isChatOnDelete) {
-        socket.emit('chatOnDelete', {
-          type: 'success',
-          result: isChatOnDelete,
-        });
-      }
     } catch (err) {
       logger.error(`Error in user left chat- ${err}`);
       socket.emit('error_emit', {
         type: 'error with userLeftChat',
+      });
+    }
+    try {
+      const usersState = await Chat.getUsersState(data.chatId);
+      let isUsersDisconnected = true;
+      usersState.users.forEach((userInfo) => {
+        if (userInfo.isInChat) {
+          isUsersDisconnected = false;
+        }
+      });
+      let messages = await Chat.getMessages(data.chatId);
+      messages = messages.messages;
+      let isAllMessagesNotVisible = true;
+      for (let i = 0; i < messages.length; i += 1) {
+        if (messages[i].visible === true) {
+          isAllMessagesNotVisible = false;
+        }
+      }
+
+      if (isUsersDisconnected && isAllMessagesNotVisible) {
+        if (messages.length !== 0) {
+          const messagesToAdd = messagesToArchiveType(messages);
+          const chatArchiveToCreate = ChatArchive({
+            messages: messagesToAdd,
+          });
+          const createdChatArchive = await ChatArchive.createArchiveChat(chatArchiveToCreate);
+          logger.info('Create archive chat...');
+          socket.emit('createArchiveChat', {
+            type: 'success',
+            result: createdChatArchive,
+          });
+        }
+      }
+    } catch (err) {
+      logger.error(`Error in create atchive chat- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with createArchiveChat',
       });
     }
   }
