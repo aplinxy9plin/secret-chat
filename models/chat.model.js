@@ -9,7 +9,10 @@ const ChatSchema = mongoose.Schema({
     visible: { type: Boolean, required: true },
     documents: { type: mongoose.Schema.Types.ObjectId, ref: 'documents' },
   }],
-  users: { type: Array, required: true },
+  users: [{
+    userId: { type: String, required: true },
+    isInChat: { type: Boolean, required: true },
+  }],
 }, { collection: 'chats' });
 
 const ChatModel = mongoose.model('chats', ChatSchema);
@@ -32,9 +35,20 @@ ChatModel.removeMessage = (_id, _messageid) => ChatModel.updateOne(
   },
 );
 
-ChatModel.removeUserMessages = (_id, _userId) => ChatModel.update(
+ChatModel.removeUserMessages = (_id, userId) => ChatModel.update(
   { _id },
-  { $set: { 'messages.$[i].visible': false } }, { arrayFilters: [{ 'i.sender': _userId }] },
+  { $set: { 'messages.$[i].visible': false } }, { arrayFilters: [{ 'i.sender': userId }] },
 );
+
+ChatModel.userLeftChat = (_id, userId) => ChatModel.update(
+  { _id }, { $set: { 'users.$[i].isInChat': false } }, { arrayFilters: [{ 'i.userId': userId }] },
+);
+
+ChatModel.userConnectedToChat = (_id, userId) => ChatModel.update(
+  { _id }, { $set: { 'users.$[i].isInChat': true } }, { arrayFilters: [{ 'i.userId': userId }] },
+);
+
+
+ChatModel.getUsersState = (_id) => ChatModel.findOne({ _id }, '-messages -_id');
 
 export default ChatModel;
