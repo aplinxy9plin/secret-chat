@@ -20,7 +20,7 @@ controller.createChat = async (socket, data) => {
       if (user) {
         const createdChat = await Chat.createChat(chatToCreate);
         logger.info('Creating chat...');
-        socket.emit('createChat', {
+        socket.emit('newChat', {
           type: 'success',
           result: createdChat,
         });
