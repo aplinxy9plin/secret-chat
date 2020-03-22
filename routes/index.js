@@ -20,6 +20,21 @@ const routes = (socket, data) => {
     case 'getMessages':
       chatController.getMessages(socket, result);
       break;
+    case 'removeUserMessages':
+      chatController.removeUserMessages(socket, result);
+      break;
+    case 'removeMessage':
+      chatController.removeMessage(socket, result);
+      break;
+    case 'userLeftChat':
+      chatController.userLeftChat(socket, result);
+      break;
+    case 'userConnectedToChat':
+      chatController.userConnectedToChat(socket, result);
+      break;
+    case 'getUsersState':
+      chatController.getUsersState(socket, result);
+      break;
     case 'addAttachment':
       attachmentController.addAttachment(socket, result);
       break;

@@ -1,8 +1,26 @@
 import Chat from '../models/chat.model';
 import User from '../models/user.model';
+import ChatArchive from '../models/chatArchive.model';
 import logger from '../core/logger';
 
 const controller = {};
+
+const messageTypes = ['text', 'document'];
+
+function messagesToArchiveType(messages) {
+  const archiveMessages = [];
+  messages.forEach((message) => {
+    const mainSender = messages[0].sender;
+    archiveMessages.push({
+      type: message.type,
+      text: message.text,
+      date: message.date,
+      documents: message.documents,
+      sender: message.sender === mainSender ? '1' : '2',
+    });
+  });
+  return archiveMessages;
+}
 
 controller.createChat = async (socket, data) => {
   if (!data.userId1 || !data.userId2 || data.userId1 === data.userId2) {
@@ -13,7 +31,7 @@ controller.createChat = async (socket, data) => {
   } else {
     const chatToCreate = Chat({
       messages: [],
-      users: [data.userId1, data.userId2],
+      users: [{ userId: data.userId1, isInChat: true }, { userId: data.userId2, isInChat: false }],
     });
     try {
       const user = await User.getUser(data.userId1);
@@ -46,8 +64,13 @@ controller.sendMessage = async (socket, data) => {
       type: 'error with sendMessage',
     });
   } else if (!data.message.sender || !data.message.visible
-    || !data.message.date || !data.message.type) {
+    || !data.message.date || !data.message.type || !messageTypes.includes(data.message.type)) {
     logger.error('Error in send message- One of required message fields is null');
+    socket.emit('error_emit', {
+      type: 'error with sendMessage',
+    });
+  } else if (!messageTypes.includes(data.message.type)) {
+    logger.error('Error in send message- unexpected message type');
     socket.emit('error_emit', {
       type: 'error with sendMessage',
     });
@@ -70,7 +93,7 @@ controller.sendMessage = async (socket, data) => {
 
 controller.getMessages = async (socket, data) => {
   if (!data.chatId) {
-    logger.error('Error in get messaget- chat id is null');
+    logger.error('Error in get messages- chat id is null');
     socket.emit('error_emit', {
       type: 'error with getMessages',
     });
@@ -90,4 +113,153 @@ controller.getMessages = async (socket, data) => {
     }
   }
 };
+
+controller.removeMessage = async (socket, data) => {
+  if (!data.chatId || !data.messageId) {
+    logger.error('Error in remove message- chat id or message is null');
+    socket.emit('error_emit', {
+      type: 'error with removeMessage',
+    });
+  } else {
+    try {
+      const removeMessage = await Chat.removeMessage(data.chatId, data.messageId);
+      logger.info('Message removed...');
+      socket.emit('removeMessage', {
+        type: 'success',
+        result: removeMessage,
+      });
+    } catch (err) {
+      logger.error(`Error in send message- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with removeMessage',
+      });
+    }
+  }
+};
+
+controller.removeUserMessages = async (socket, data) => {
+  if (!data.chatId || !data.userId) {
+    logger.error('Error in remove user messages- chat id or user id is null');
+    socket.emit('error_emit', {
+      type: 'error with removeUserMessages',
+    });
+  } else {
+    try {
+      const removeUserMessages = await Chat.removeUserMessages(data.chatId, data.userId);
+      logger.info('Messages removed...');
+      socket.emit('removeUserMessages', {
+        type: 'success',
+        result: removeUserMessages,
+      });
+    } catch (err) {
+      logger.error(`Error in send message- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with removeUserMessages',
+      });
+    }
+  }
+};
+
+controller.userLeftChat = async (socket, data) => {
+  if (!data.chatId || !data.userId) {
+    logger.error('Error in user left chat- chat id or user id is null');
+    socket.emit('error_emit', {
+      type: 'error with userLeftChat',
+    });
+  } else {
+    try {
+      const userLeftChatResult = await Chat.userLeftChat(data.chatId, data.userId);
+      logger.info('Messages set visible false...');
+      socket.emit('userLeftChat', {
+        type: 'success',
+        result: userLeftChatResult,
+      });
+    } catch (err) {
+      logger.error(`Error in user left chat- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with userLeftChat',
+      });
+    }
+    try {
+      const usersState = await Chat.getUsersState(data.chatId);
+      const isUsersDisconnected = !usersState.users.filter((item) => item.isInChat).lenght > 0;
+      let messages = await Chat.getMessages(data.chatId);
+      messages = messages.messages;
+      const isAllMessagesNotVisible = !messages.filter((item) => item.visible === true).length > 0;
+
+      if (isUsersDisconnected && isAllMessagesNotVisible) {
+        if (messages.length !== 0) {
+          const messagesToAdd = messagesToArchiveType(messages);
+          const chatArchiveToCreate = ChatArchive({
+            messages: messagesToAdd,
+          });
+          const createdChatArchive = await ChatArchive.createArchiveChat(chatArchiveToCreate);
+          logger.info('Create archive chat...');
+          socket.emit('createArchiveChat', {
+            type: 'success',
+            result: createdChatArchive,
+          });
+          const deletedChat = await Chat.deleteChat(data.chatId);
+          logger.info('Delete chat...');
+          socket.emit('deleteChat', {
+            type: 'success',
+            result: deletedChat,
+          });
+        }
+      }
+    } catch (err) {
+      logger.error(`Error in create archive chat- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with createArchiveChat',
+      });
+    }
+  }
+};
+
+controller.userConnectedToChat = async (socket, data) => {
+  if (!data.chatId || !data.userId) {
+    logger.error('Error in user left chat- chat id or user id is null');
+    socket.emit('error_emit', {
+      type: 'error with userConnectedToChat',
+    });
+  } else {
+    try {
+      const userConnectedResult = await Chat.userConnectedToChat(data.chatId, data.userId);
+      logger.info('Messages set visible false...');
+      socket.emit('userConnectedToChat', {
+        type: 'success',
+        result: userConnectedResult,
+      });
+    } catch (err) {
+      logger.error(`Error in send message- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with userConnectedToChat',
+      });
+    }
+  }
+};
+
+controller.getUsersState = async (socket, data) => {
+  if (!data.chatId) {
+    logger.error('Error in users state- chat id is null');
+    socket.emit('error_emit', {
+      type: 'error with getUsersState',
+    });
+  } else {
+    try {
+      const usersInfo = await Chat.getUsersState(data.chatId);
+      logger.info('Getting users state...');
+      socket.emit('getUsersState', {
+        type: 'success',
+        result: usersInfo,
+      });
+    } catch (err) {
+      logger.error(`Error in get users state- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with getUsersState',
+      });
+    }
+  }
+};
+
 export default controller;
