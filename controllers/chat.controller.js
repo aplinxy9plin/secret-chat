@@ -93,17 +93,40 @@ controller.getMessages = async (socket, data) => {
 
 controller.removeMessage = async (socket, data) => {
   if (!data.chatId || !data.messageId) {
-    logger.error('Error in send message- chat id or message is null');
+    logger.error('Error in remove message- chat id or message is null');
     socket.emit('error_emit', {
       type: 'error with visible',
     });
   } else {
     try {
       const removeMessage = await Chat.removeMessage(data.chatId, data.messageId);
-      logger.info('No visible message...');
+      logger.info('Message set visible false...');
       socket.emit('removeMessage', {
         type: 'success',
         result: removeMessage,
+      });
+    } catch (err) {
+      logger.error(`Error in send message- ${err}`);
+      socket.emit('error_emit', {
+        type: 'error with visible',
+      });
+    }
+  }
+};
+
+controller.removeUserMessages = async (socket, data) => {
+  if (!data.chatId || !data.userId) {
+    logger.error('Error in remove user messages- chat id or user id is null');
+    socket.emit('error_emit', {
+      type: 'error with visible',
+    });
+  } else {
+    try {
+      const removeUserMessages = await Chat.removeUserMessages(data.chatId, data.userId);
+      logger.info('Messages set visible false...');
+      socket.emit('removeUserMessages', {
+        type: 'success',
+        result: removeUserMessages,
       });
     } catch (err) {
       logger.error(`Error in send message- ${err}`);

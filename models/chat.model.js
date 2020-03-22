@@ -4,7 +4,7 @@ const ChatSchema = mongoose.Schema({
   messages: [{
     type: { type: String, required: true },
     text: { type: String },
-    sender: { type: String },
+    sender: { type: String, required: true },
     date: { type: Date, required: true },
     visible: { type: Boolean, required: true },
     documents: { type: mongoose.Schema.Types.ObjectId, ref: 'documents' },
@@ -30,6 +30,11 @@ ChatModel.removeMessage = (_id, _messageid) => ChatModel.updateOne(
   { _id, 'messages._id': _messageid }, {
     $set: { 'messages.$.visible': false },
   },
+);
+
+ChatModel.removeUserMessages = (_id, _userId) => ChatModel.update(
+  { _id },
+  { $set: { 'messages.$[i].visible': false } }, { arrayFilters: [{ 'i.sender': _userId }] },
 );
 
 export default ChatModel;
