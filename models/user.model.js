@@ -7,7 +7,7 @@ const UserSchema = mongoose.Schema({
 
 const UserModel = mongoose.model('users', UserSchema);
 
-UserModel.newUser = (userToAdd) => userToAdd.save();
+UserModel.addUser = (userToAdd) => userToAdd.save();
 
 UserModel.getChats = (userId) => UserModel.findOne({ userId }, { _id: 0, chatList: 1 });
 

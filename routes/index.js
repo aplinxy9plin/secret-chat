@@ -6,7 +6,7 @@ const routes = (socket, data) => {
   const result = JSON.parse(data.data[1]);
   switch (data.data[0]) {
     case 'newUser':
-      userController.newUser(socket, result);
+      userController.addUser(socket, result);
       break;
     case 'getChats':
       userController.getChats(socket, result);
@@ -16,9 +16,6 @@ const routes = (socket, data) => {
       break;
     case 'sendMessage':
       chatController.sendMessage(socket, result);
-      break;
-    case 'removeMessage':
-      chatController.removeMessage(socket, result);
       break;
     case 'getMessages':
       chatController.getMessages(socket, result);
