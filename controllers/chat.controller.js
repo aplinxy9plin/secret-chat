@@ -182,20 +182,10 @@ controller.userLeftChat = async (socket, data) => {
     }
     try {
       const usersState = await Chat.getUsersState(data.chatId);
-      let isUsersDisconnected = true;
-      usersState.users.forEach((userInfo) => {
-        if (userInfo.isInChat) {
-          isUsersDisconnected = false;
-        }
-      });
+      const isUsersDisconnected = !usersState.users.filter((item) => item.isInChat).lenght > 0;
       let messages = await Chat.getMessages(data.chatId);
       messages = messages.messages;
-      let isAllMessagesNotVisible = true;
-      for (let i = 0; i < messages.length; i += 1) {
-        if (messages[i].visible === true) {
-          isAllMessagesNotVisible = false;
-        }
-      }
+      const isAllMessagesNotVisible = !messages.filter((item) => item.visible === true).length > 0;
 
       if (isUsersDisconnected && isAllMessagesNotVisible) {
         if (messages.length !== 0) {
@@ -209,10 +199,16 @@ controller.userLeftChat = async (socket, data) => {
             type: 'success',
             result: createdChatArchive,
           });
+          const deletedChat = await Chat.deleteChat(data.chatId);
+          logger.info('Delete chat...');
+          socket.emit('deleteChat', {
+            type: 'success',
+            result: deletedChat,
+          });
         }
       }
     } catch (err) {
-      logger.error(`Error in create atchive chat- ${err}`);
+      logger.error(`Error in create archive chat- ${err}`);
       socket.emit('error_emit', {
         type: 'error with createArchiveChat',
       });

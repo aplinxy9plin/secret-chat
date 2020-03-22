@@ -48,6 +48,7 @@ ChatModel.userConnectedToChat = (_id, userId) => ChatModel.update(
   { _id }, { $set: { 'users.$[i].isInChat': true } }, { arrayFilters: [{ 'i.userId': userId }] },
 );
 
+ChatModel.deleteChat = (_id) => ChatModel.deleteOne({ _id });
 
 ChatModel.getUsersState = (_id) => ChatModel.findOne({ _id }, '-messages -_id');
 
