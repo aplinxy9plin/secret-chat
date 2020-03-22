@@ -9,12 +9,15 @@ controller.addUser = async (socket, data) => {
     chatList: [],
   });
   try {
-    const savedUser = await User.addUser(userToAdd);
-    logger.info('Adding user...');
-    socket.emit('newUser', {
-      type: 'success',
-      result: savedUser,
-    });
+    const user = await User.getUser(data.vk_user_id);
+    if (!user) {
+      const savedUser = await User.addUser(userToAdd);
+      logger.info('Adding user...');
+      socket.emit('newUser', {
+        type: 'success',
+        result: savedUser,
+      });
+    }
   } catch (err) {
     logger.error(`Error in save user- ${err}`);
     socket.emit('error_emit', {
