@@ -9,7 +9,10 @@ import connectToDb from './db/connect';
 import logger from './core/logger';
 import routes from './routes';
 
+const cors = require('cors');
+
 const app = express();
+app.use(cors());
 const server = http.Server(app);
 const io = socketio(server);
 
