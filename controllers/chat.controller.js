@@ -7,7 +7,7 @@ const controller = {};
 
 const messageTypes = ['text', 'document'];
 
-const messagesToArchiveType = (messages) => {
+function messagesToArchiveType(messages) {
   const archiveMessages = [];
   messages.forEach((message) => {
     const mainSender = messages[0].sender;
@@ -20,7 +20,7 @@ const messagesToArchiveType = (messages) => {
     });
   });
   return archiveMessages;
-};
+}
 
 controller.createChat = async (socket, data) => {
   if (!data.vk_user_id1 || !data.vk_user_id2 || data.vk_user_id1 === data.vk_user_id2) {
@@ -31,11 +31,7 @@ controller.createChat = async (socket, data) => {
   } else {
     const chatToCreate = Chat({
       messages: [],
-      users: [
-        {
-          userId: data.vk_user_id1,
-          isInChat: true,
-        }, { userId: data.vk_user_id2, isInChat: false }],
+      users: [{ userId: data.vk_user_id1, isInChat: true }, { userId: data.vk_user_id2, isInChat: false }],
     });
     try {
       const user = await User.getUser(data.vk_user_id1);
