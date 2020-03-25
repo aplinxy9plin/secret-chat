@@ -35,6 +35,7 @@ io.use(middleware());
 io.on('connection', (socket) => {
   socket.emit('hello', 'world');
   socket.on('*', (data) => {
+    console.log(data);
     if (typeof data.data[1] !== 'string') {
       // eslint-disable-next-line no-param-reassign
       data.data[1] = JSON.stringify(data.data[1]);
