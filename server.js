@@ -35,6 +35,10 @@ io.use(middleware());
 io.on('connection', (socket) => {
   socket.emit('hello', 'world');
   socket.on('*', (data) => {
+    if (typeof data.data[1] !== 'string') {
+      // eslint-disable-next-line no-param-reassign
+      data.data[1] = JSON.stringify(data.data[1]);
+    }
     const req = qs.decode(JSON.stringify(JSON.parse(data.data[1]).qs));
     delete Object.assign(req, { vk_access_token_settings: req['"vk_access_token_settings'] })['"vk_access_token_settings'];
     if (req.sign && req.vk_user_id) {
