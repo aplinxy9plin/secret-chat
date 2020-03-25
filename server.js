@@ -38,7 +38,6 @@ io.on('connection', (socket) => {
     console.log(data.data[1]);
     if (data.data[1]) {
       const req = qs.decode(data.data[1].qs);
-      delete Object.assign(req, { vk_access_token_settings: req['"vk_access_token_settings'] })['"vk_access_token_settings'];
       if (req.sign && req.vk_user_id) {
         const urlParams = req;
         const ordered = {};
@@ -56,7 +55,7 @@ io.on('connection', (socket) => {
           .replace(/\+/g, '-')
           .replace(/\//g, '_')
           .replace(/=$/, '');
-        if (paramsHash === urlParams.sign.slice(0, urlParams.sign.length - 1)) {
+        if (paramsHash === urlParams.sign) {
           routes(socket, data);
         } else {
           socket.emit(data.data[0], {
