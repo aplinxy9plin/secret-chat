@@ -3,7 +3,7 @@ import chatController from '../controllers/chat.controller';
 import attachmentController from '../controllers/attachment.controller';
 
 const routes = (socket, data) => {
-  const result = JSON.parse(data.data[1]);
+  const result = data.data[1];
   switch (data.data[0]) {
     case 'newUser':
       userController.addUser(socket, result);

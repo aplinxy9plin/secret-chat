@@ -35,32 +35,33 @@ io.use(middleware());
 io.on('connection', (socket) => {
   socket.emit('hello', 'world');
   socket.on('*', (data) => {
-    console.log(data);
-    if (typeof data.data[1] !== 'string') {
-      // eslint-disable-next-line no-param-reassign
-      data.data[1] = JSON.stringify(data.data[1]);
-    }
-    const req = qs.decode(JSON.stringify(JSON.parse(data.data[1]).qs));
-    delete Object.assign(req, { vk_access_token_settings: req['"vk_access_token_settings'] })['"vk_access_token_settings'];
-    if (req.sign && req.vk_user_id) {
-      const urlParams = req;
-      const ordered = {};
-      Object.keys(urlParams).sort().forEach((key) => {
-        if (key.slice(0, 3) === 'vk_') {
-          ordered[key] = urlParams[key];
+    if (data.data[1]) {
+      const req = qs.decode(data.data[1].qs);
+      delete Object.assign(req, { vk_access_token_settings: req['"vk_access_token_settings'] })['"vk_access_token_settings'];
+      if (req.sign && req.vk_user_id) {
+        const urlParams = req;
+        const ordered = {};
+        Object.keys(urlParams).sort().forEach((key) => {
+          if (key.slice(0, 3) === 'vk_') {
+            ordered[key] = urlParams[key];
+          }
+        });
+        const stringParams = qs.stringify(ordered);
+        const paramsHash = crypto
+          .createHmac('sha256', config.secretKey)
+          .update(stringParams)
+          .digest()
+          .toString('base64')
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=$/, '');
+        if (paramsHash === urlParams.sign.slice(0, urlParams.sign.length - 1)) {
+          routes(socket, data);
+        } else {
+          socket.emit('error_emit', {
+            type: 'error with auth',
+          });
         }
-      });
-      const stringParams = qs.stringify(ordered);
-      const paramsHash = crypto
-        .createHmac('sha256', config.secretKey)
-        .update(stringParams)
-        .digest()
-        .toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=$/, '');
-      if (paramsHash === urlParams.sign.slice(0, urlParams.sign.length - 1)) {
-        routes(socket, data);
       } else {
         socket.emit('error_emit', {
           type: 'error with auth',
