@@ -6,40 +6,40 @@ const routes = (socket, data) => {
   const result = data.data[1];
   switch (data.data[0]) {
     case 'newUser':
-      userController.addUser(socket, result);
+      userController.addUser(socket, result, data.data[0]);
       break;
     case 'getChats':
-      userController.getChats(socket, result);
+      userController.getChats(socket, result, data.data[0]);
       break;
     case 'createChat':
-      chatController.createChat(socket, result);
+      chatController.createChat(socket, result, data.data[0]);
       break;
     case 'sendMessage':
-      chatController.sendMessage(socket, result);
+      chatController.sendMessage(socket, result, data.data[0]);
       break;
     case 'getMessages':
-      chatController.getMessages(socket, result);
+      chatController.getMessages(socket, result, data.data[0]);
       break;
     case 'removeUserMessages':
-      chatController.removeUserMessages(socket, result);
+      chatController.removeUserMessages(socket, result, data.data[0]);
       break;
     case 'removeMessage':
-      chatController.removeMessage(socket, result);
+      chatController.removeMessage(socket, result, data.data[0]);
       break;
     case 'userLeftChat':
-      chatController.userLeftChat(socket, result);
+      chatController.userLeftChat(socket, result, data.data[0]);
       break;
     case 'userConnectedToChat':
-      chatController.userConnectedToChat(socket, result);
+      chatController.userConnectedToChat(socket, result, data.data[0]);
       break;
     case 'getUsersState':
-      chatController.getUsersState(socket, result);
+      chatController.getUsersState(socket, result, data.data[0]);
       break;
     case 'addAttachment':
-      attachmentController.addAttachment(socket, result);
+      attachmentController.addAttachment(socket, result, data.data[0]);
       break;
     case 'getAttachment':
-      attachmentController.getAttachment(socket, result);
+      attachmentController.getAttachment(socket, result, data.data[0]);
       break;
     default:
       break;

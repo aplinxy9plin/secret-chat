@@ -4,15 +4,15 @@ import logger from '../core/logger';
 const controller = {};
 const attachmentTypes = ['Image', 'Doc', 'Video'];
 
-controller.addAttachment = async (socket, data) => {
+controller.addAttachment = async (socket, data, emitName) => {
   if (!data.attachmentData || !data.type || !attachmentTypes.includes(data.type)) {
     logger.error('Error in add attachment- attachment data or type is null or type was wrong');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with addAttachment',
     });
   } else if (!attachmentTypes.includes(data.type)) {
     logger.error('Error in send message- unexpected attachment type');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with addAttachment',
     });
   } else {
@@ -30,17 +30,17 @@ controller.addAttachment = async (socket, data) => {
       });
     } catch (err) {
       logger.error(`Error in add attachment- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with addAttachment',
       });
     }
   }
 };
 
-controller.getAttachment = async (socket, data) => {
+controller.getAttachment = async (socket, data, emitName) => {
   if (!data.attachmentId || !data.messageId) {
     logger.error('Error in get attachment- attachment id or message id is null');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with getAttachment',
     });
   } else {
@@ -53,7 +53,7 @@ controller.getAttachment = async (socket, data) => {
       });
     } catch (err) {
       logger.error(`Error in save user- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with getAttachment',
       });
     }

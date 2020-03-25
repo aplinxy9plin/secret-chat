@@ -22,10 +22,10 @@ const messagesToArchiveType = (messages) => {
   return archiveMessages;
 };
 
-controller.createChat = async (socket, data) => {
+controller.createChat = async (socket, data, emitName) => {
   if (!data.vk_user_id1 || !data.vk_user_id2 || data.vk_user_id1 === data.vk_user_id2) {
     logger.error('Error in create chat- One of user Id\'s is null or equal');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with createChat',
     });
   } else {
@@ -48,34 +48,34 @@ controller.createChat = async (socket, data) => {
         });
       } else {
         logger.error('Error in create chat, userId is undefined');
-        socket.emit('error_emit', {
+        socket.emit(emitName, {
           type: 'error with createChat',
         });
       }
     } catch (err) {
       logger.error(`Error in create chat- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with createChat',
       });
     }
   }
 };
 
-controller.sendMessage = async (socket, data) => {
+controller.sendMessage = async (socket, data, emitName) => {
   if (!data.chatId || !data.message) {
     logger.error('Error in send message- chat id or message is null');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with sendMessage',
     });
   } else if (!data.message.sender || !data.message.visible
     || !data.message.date || !data.message.type || !messageTypes.includes(data.message.type)) {
     logger.error('Error in send message- One of required message fields is null');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with sendMessage',
     });
   } else if (!messageTypes.includes(data.message.type)) {
     logger.error('Error in send message- unexpected message type');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with sendMessage',
     });
   } else {
@@ -88,17 +88,17 @@ controller.sendMessage = async (socket, data) => {
       });
     } catch (err) {
       logger.error(`Error in send message- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with sendMessage',
       });
     }
   }
 };
 
-controller.getMessages = async (socket, data) => {
+controller.getMessages = async (socket, data, emitName) => {
   if (!data.chatId) {
     logger.error('Error in get messages- chat id is null');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with getMessages',
     });
   } else {
@@ -111,17 +111,17 @@ controller.getMessages = async (socket, data) => {
       });
     } catch (err) {
       logger.error(`Error in get messages- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with getMessages',
       });
     }
   }
 };
 
-controller.removeMessage = async (socket, data) => {
+controller.removeMessage = async (socket, data, emitName) => {
   if (!data.chatId || !data.messageId) {
     logger.error('Error in remove message- chat id or message is null');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with removeMessage',
     });
   } else {
@@ -134,17 +134,17 @@ controller.removeMessage = async (socket, data) => {
       });
     } catch (err) {
       logger.error(`Error in send message- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with removeMessage',
       });
     }
   }
 };
 
-controller.removeUserMessages = async (socket, data) => {
+controller.removeUserMessages = async (socket, data, emitName) => {
   if (!data.chatId || !data.vk_user_id) {
     logger.error('Error in remove user messages- chat id or user id is null');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with removeUserMessages',
     });
   } else {
@@ -157,17 +157,17 @@ controller.removeUserMessages = async (socket, data) => {
       });
     } catch (err) {
       logger.error(`Error in send message- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with removeUserMessages',
       });
     }
   }
 };
 
-controller.userLeftChat = async (socket, data) => {
+controller.userLeftChat = async (socket, data, emitName) => {
   if (!data.chatId || !data.vk_user_id) {
     logger.error('Error in user left chat- chat id or user id is null');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with userLeftChat',
     });
   } else {
@@ -180,7 +180,7 @@ controller.userLeftChat = async (socket, data) => {
       });
     } catch (err) {
       logger.error(`Error in user left chat- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with userLeftChat',
       });
     }
@@ -213,17 +213,17 @@ controller.userLeftChat = async (socket, data) => {
       }
     } catch (err) {
       logger.error(`Error in create archive chat- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with createArchiveChat',
       });
     }
   }
 };
 
-controller.userConnectedToChat = async (socket, data) => {
+controller.userConnectedToChat = async (socket, data, emitName) => {
   if (!data.chatId || !data.vk_user_id) {
     logger.error('Error in user left chat- chat id or user id is null');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with userConnectedToChat',
     });
   } else {
@@ -236,17 +236,17 @@ controller.userConnectedToChat = async (socket, data) => {
       });
     } catch (err) {
       logger.error(`Error in send message- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with userConnectedToChat',
       });
     }
   }
 };
 
-controller.getUsersState = async (socket, data) => {
+controller.getUsersState = async (socket, data, emitName) => {
   if (!data.chatId) {
     logger.error('Error in users state- chat id is null');
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with getUsersState',
     });
   } else {
@@ -259,7 +259,7 @@ controller.getUsersState = async (socket, data) => {
       });
     } catch (err) {
       logger.error(`Error in get users state- ${err}`);
-      socket.emit('error_emit', {
+      socket.emit(emitName, {
         type: 'error with getUsersState',
       });
     }

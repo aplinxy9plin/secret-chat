@@ -3,7 +3,7 @@ import logger from '../core/logger';
 
 const controller = {};
 
-controller.addUser = async (socket, data) => {
+controller.addUser = async (socket, data, emitName) => {
   const userToAdd = User({
     userId: data.vk_user_id,
     chatList: [],
@@ -20,13 +20,13 @@ controller.addUser = async (socket, data) => {
     }
   } catch (err) {
     logger.error(`Error in save user- ${err}`);
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with addUser',
     });
   }
 };
 
-controller.getChats = async (socket, data) => {
+controller.getChats = async (socket, data, emitName) => {
   try {
     const chats = await User.getChats(data.vk_user_id);
     logger.info('Getting chats...');
@@ -36,7 +36,7 @@ controller.getChats = async (socket, data) => {
     });
   } catch (err) {
     logger.error(`Error in save user- ${err}`);
-    socket.emit('error_emit', {
+    socket.emit(emitName, {
       type: 'error with getChats',
     });
   }

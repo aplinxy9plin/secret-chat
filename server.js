@@ -59,17 +59,17 @@ io.on('connection', (socket) => {
         if (paramsHash === urlParams.sign.slice(0, urlParams.sign.length - 1)) {
           routes(socket, data);
         } else {
-          socket.emit('error_emit', {
+          socket.emit(data.data[0], {
             type: 'error with auth',
           });
         }
       } else {
-        socket.emit('error_emit', {
+        socket.emit(data.data[0], {
           type: 'error with auth',
         });
       }
     } else {
-      socket.emit('error_emit', {
+      socket.emit(data.data[0], {
         type: 'error with auth',
       });
     }
