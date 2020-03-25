@@ -35,6 +35,7 @@ io.use(middleware());
 io.on('connection', (socket) => {
   socket.emit('hello', 'world');
   socket.on('*', (data) => {
+    console.log(data.data[1]);
     if (data.data[1]) {
       const req = qs.decode(data.data[1].qs);
       delete Object.assign(req, { vk_access_token_settings: req['"vk_access_token_settings'] })['"vk_access_token_settings'];
