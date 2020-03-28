@@ -4,13 +4,13 @@ const ChatSchema = mongoose.Schema({
   messages: [{
     type: { type: String, enum: ['text', 'document'], required: true },
     text: { type: String },
-    sender: { type: String },
+    sender: { type: Number },
     date: { type: Date, required: true },
     visible: { type: Boolean, required: true },
     documents: { type: mongoose.Schema.Types.ObjectId, ref: 'documents' },
   }],
   users: [{
-    userId: { type: String, required: true },
+    userId: { type: Number, required: true },
     isInChat: { type: Boolean, required: true },
   }],
 }, { collection: 'chats' });
