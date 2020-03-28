@@ -35,19 +35,54 @@ controller.createChat = async (socket, data, emitName) => {
         {
           userId: data.vk_user_id1,
           isInChat: true,
-        }, { userId: data.vk_user_id2, isInChat: false }],
+        },
+        {
+          userId: data.vk_user_id2,
+          isInChat: false,
+        }],
     });
     try {
-      const user = await User.getUser(data.vk_user_id1);
-      if (user) {
+      const user1 = await User.getUser(data.vk_user_id1);
+      if (user1) {
         const createdChat = await Chat.createChat(chatToCreate);
         logger.info('Creating chat...');
         socket.emit('newChat', {
           type: 'success',
           result: createdChat,
         });
+
+        const user2 = await User.getUser(data.vk_user_id2);
+        if (!user2) {
+          const userToAdd = User({
+            userId: data.vk_user_id2,
+            chatList: [createdChat._id],
+          });
+          const savedUser = await User.addUser(userToAdd);
+          logger.info('Adding user...');
+          socket.emit('newUser', {
+            type: 'success',
+            result: savedUser,
+          });
+        } else {
+          const user2ToUpdate = await User.update(
+            { _id: user2._id }, { $push: { chatList: createdChat._id } },
+          );
+          logger.info('Updating user2 chat list...');
+          socket.emit('updateUser', {
+            type: 'success',
+            result: user2ToUpdate,
+          });
+        }
+        const user2ToUpdate = await User.update(
+          { _id: user2._id }, { $push: { chatList: createdChat._id } },
+        );
+        logger.info('Updating user1 chat list...');
+        socket.emit('updateUser', {
+          type: 'success',
+          result: user2ToUpdate,
+        });
       } else {
-        logger.error('Error in create chat, userId is undefined');
+        logger.error('Error in create chat, vk_user_id1 is undefined');
         socket.emit(emitName, {
           type: 'error with createChat',
         });
