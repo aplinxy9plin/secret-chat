@@ -73,13 +73,13 @@ controller.createChat = async (socket, data, emitName) => {
             result: user2ToUpdate,
           });
         }
-        const user2ToUpdate = await User.update(
-          { _id: user2._id }, { $push: { chatList: createdChat._id } },
+        const user1ToUpdate = await User.update(
+          { _id: user1._id }, { $push: { chatList: createdChat._id } },
         );
         logger.info('Updating user1 chat list...');
         socket.emit('updateUser', {
           type: 'success',
-          result: user2ToUpdate,
+          result: user1ToUpdate,
         });
       } else {
         logger.error('Error in create chat, vk_user_id1 is undefined');
