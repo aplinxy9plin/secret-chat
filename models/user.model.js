@@ -2,7 +2,10 @@ import mongoose from 'mongoose';
 
 const UserSchema = mongoose.Schema({
   userId: { type: Number, required: true, unique: true },
-  chatList: { type: Array, required: true },
+  chatList: [{
+    chatId: { type: mongoose.Schema.Types.ObjectId, ref: 'chats', required: true },
+    companion: { type: Number, required: true },
+  }],
 }, { collection: 'users' });
 
 const UserModel = mongoose.model('users', UserSchema);

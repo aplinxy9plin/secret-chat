@@ -55,7 +55,7 @@ controller.createChat = async (socket, data, emitName) => {
         if (!user2) {
           const userToAdd = User({
             userId: data.vk_user_id2,
-            chatList: [createdChat._id],
+            chatList: [{ chatId: createdChat._id, companion: data.vk_user_id1 }],
           });
           const savedUser = await User.addUser(userToAdd);
           logger.info('Adding user...');
@@ -65,7 +65,7 @@ controller.createChat = async (socket, data, emitName) => {
           });
         } else {
           const user2ToUpdate = await User.update(
-            { _id: user2._id }, { $push: { chatList: createdChat._id } },
+            { _id: user2._id }, { $push: { chatList: { chatId: createdChat._id, companion: data.vk_user_id1 } } },
           );
           logger.info('Updating user2 chat list...');
           socket.emit('updateUser', {
@@ -74,7 +74,7 @@ controller.createChat = async (socket, data, emitName) => {
           });
         }
         const user1ToUpdate = await User.update(
-          { _id: user1._id }, { $push: { chatList: createdChat._id } },
+          { _id: user1._id }, { $push: { chatList: { chatId: createdChat._id, companion: data.vk_user_id2 } } },
         );
         logger.info('Updating user1 chat list...');
         socket.emit('updateUser', {
