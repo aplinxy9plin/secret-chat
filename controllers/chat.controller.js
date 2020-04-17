@@ -1,4 +1,4 @@
-import Chat from '../models/chat.model';
+import Chat, { SOCKET_ID_NULL } from '../models/chat.model';
 import User from '../models/user.model';
 import ChatArchive from '../models/chatArchive.model';
 import logger from '../core/logger';
@@ -34,11 +34,11 @@ controller.createChat = async (socket, data, emitName) => {
       users: [
         {
           userId: data.vk_user_id1,
-          isInChat: true,
+          socketId: socket.id,
         },
         {
           userId: data.vk_user_id2,
-          isInChat: false,
+          socketId: SOCKET_ID_NULL,
         }],
     });
     try {
@@ -120,6 +120,25 @@ controller.sendMessage = async (socket, data, emitName) => {
       socket.emit('sendMessage', {
         type: 'success',
         result: newMessage,
+      });
+
+      // Получаем сокеты всех юзеров, находящихся сейчас в чате по их id, которые записаны в БД
+      const usersState = await Chat.getUsersState(data.chatId);
+      const usersSocketId = usersState
+        .filter((userState) => userState.socketId !== SOCKET_ID_NULL);
+
+      const thisChatSockets = [];
+      global.io.sockets.forEach((ioSocket) => {
+        if (usersSocketId.find(ioSocket.id)) {
+          thisChatSockets.push(ioSocket);
+        }
+      });
+      // Отправляем сообщение всем сокетам в чате
+      thisChatSockets.forEach((chatSocket) => {
+        chatSocket.emit('newMessage', {
+          type: 'message',
+          result: data.message,
+        });
       });
     } catch (err) {
       logger.error(`Error in send message- ${err}`);
@@ -221,7 +240,7 @@ controller.userLeftChat = async (socket, data, emitName) => {
     }
     try {
       const usersState = await Chat.getUsersState(data.chatId);
-      const isUsersDisconnected = !usersState.users.filter((item) => item.isInChat).lenght > 0;
+      const isUsersDisconnected = !usersState.users.filter((item) => item.socketId !== SOCKET_ID_NULL).lenght > 0;
       let messages = await Chat.getMessages(data.chatId);
       messages = messages.messages;
       const isAllMessagesNotVisible = !messages.filter((item) => item.visible === true).length > 0;
