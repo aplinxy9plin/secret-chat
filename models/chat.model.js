@@ -11,9 +11,11 @@ const ChatSchema = mongoose.Schema({
   }],
   users: [{
     userId: { type: Number, required: true },
-    isInChat: { type: Boolean, required: true },
+    socketId: { type: String, required: true },
   }],
 }, { collection: 'chats' });
+
+const SOCKET_ID_NULL = 'null';
 
 const ChatModel = mongoose.model('chats', ChatSchema);
 
@@ -41,11 +43,11 @@ ChatModel.removeUserMessages = (_id, userId) => ChatModel.update(
 );
 
 ChatModel.userLeftChat = (_id, userId) => ChatModel.update(
-  { _id }, { $set: { 'users.$[i].isInChat': false } }, { arrayFilters: [{ 'i.userId': userId }] },
+  { _id }, { $set: { 'users.$[i].socketId': SOCKET_ID_NULL } }, { arrayFilters: [{ 'i.userId': userId }] },
 );
 
-ChatModel.userConnectedToChat = (_id, userId) => ChatModel.update(
-  { _id }, { $set: { 'users.$[i].isInChat': true } }, { arrayFilters: [{ 'i.userId': userId }] },
+ChatModel.userConnectedToChat = (_id, userId, socketId) => ChatModel.update(
+  { _id }, { $set: { 'users.$[i].socketId': socketId } }, { arrayFilters: [{ 'i.userId': userId }] },
 );
 
 ChatModel.deleteChat = (_id) => ChatModel.deleteOne({ _id });
@@ -53,3 +55,4 @@ ChatModel.deleteChat = (_id) => ChatModel.deleteOne({ _id });
 ChatModel.getUsersState = (_id) => ChatModel.findOne({ _id }, '-messages -_id');
 
 export default ChatModel;
+export { SOCKET_ID_NULL };

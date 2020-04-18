@@ -15,6 +15,7 @@ const app = express();
 app.use(cors());
 const server = http.Server(app);
 const io = socketio(server);
+global.io = io;
 
 connectToDb();
 
