@@ -279,7 +279,7 @@ controller.userConnectedToChat = async (socket, data, emitName) => {
     });
   } else {
     try {
-      const userConnectedResult = await Chat.userConnectedToChat(data.chatId, data.vk_user_id);
+      const userConnectedResult = await Chat.userConnectedToChat(data.chatId, data.vk_user_id, socket.id);
       logger.info('Messages set visible false...');
       socket.emit('userConnectedToChat', {
         type: 'success',
