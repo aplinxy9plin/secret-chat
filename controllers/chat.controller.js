@@ -121,21 +121,18 @@ controller.sendMessage = async (socket, data, emitName) => {
         type: 'success',
         result: newMessage,
       });
-
-      // Получаем сокеты всех юзеров, находящихся сейчас в чате по их id, которые записаны в БД
-      const usersState = await Chat.getUsersState(data.chatId);
-      const usersSocketId = usersState
+      // Получаем состояние всех юзеров, находящихся сейчас в чате по их id, которые записаны в БД
+      let usersState = await Chat.getUsersState(data.chatId);
+      usersState = usersState.users
         .filter((userState) => userState.socketId !== SOCKET_ID_NULL);
-
-      const thisChatSockets = [];
-      global.io.sockets.forEach((ioSocket) => {
-        if (usersSocketId.find(ioSocket.id)) {
-          thisChatSockets.push(ioSocket);
-        }
+      // Вытаскиваем из состояния socketId
+      const thisChatSocketsId = [];
+      usersState.forEach((element) => {
+        thisChatSocketsId.push(element.socketId);
       });
       // Отправляем сообщение всем сокетам в чате
-      thisChatSockets.forEach((chatSocket) => {
-        chatSocket.emit('newMessage', {
+      thisChatSocketsId.forEach((socketId) => {
+        global.io.sockets.connected[socketId].emit('newMessage', {
           type: 'message',
           result: data.message,
         });
