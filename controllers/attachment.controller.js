@@ -38,7 +38,7 @@ controller.addAttachment = async (socket, data, emitName) => {
 };
 
 controller.getAttachment = async (socket, data, emitName) => {
-  if (!data.attachmentId || !data.messageId) {
+  if (!data.attachmentId) {
     logger.error('Error in get attachment- attachment id or message id is null');
     socket.emit(emitName, {
       type: 'error with getAttachment',
