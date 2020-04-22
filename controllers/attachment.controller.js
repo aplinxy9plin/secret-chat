@@ -2,16 +2,10 @@ import Attachment from '../models/attachment.model';
 import logger from '../core/logger';
 
 const controller = {};
-const attachmentTypes = ['Image', 'Doc', 'Video'];
 
 controller.addAttachment = async (socket, data, emitName) => {
-  if (!data.attachmentData || !data.type || !attachmentTypes.includes(data.type)) {
+  if (!data.attachmentData || !data.type) {
     logger.error('Error in add attachment- attachment data or type is null or type was wrong');
-    socket.emit(emitName, {
-      type: 'error with addAttachment',
-    });
-  } else if (!attachmentTypes.includes(data.type)) {
-    logger.error('Error in send message- unexpected attachment type');
     socket.emit(emitName, {
       type: 'error with addAttachment',
     });
@@ -20,7 +14,6 @@ controller.addAttachment = async (socket, data, emitName) => {
       data: data.attachmentData,
       type: data.type,
     });
-
     try {
       const addAttachment = await Attachment.addAttachment(attachmentToAdd);
       logger.info('Adding document...');
@@ -38,7 +31,7 @@ controller.addAttachment = async (socket, data, emitName) => {
 };
 
 controller.getAttachment = async (socket, data, emitName) => {
-  if (!data.attachmentId || !data.messageId) {
+  if (!data.attachmentId) {
     logger.error('Error in get attachment- attachment id or message id is null');
     socket.emit(emitName, {
       type: 'error with getAttachment',

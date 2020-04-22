@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const AttachmentsSchema = mongoose.Schema({
   data: { type: Buffer, required: true },
-  type: { type: String, enum: ['Image', 'Doc', 'Video'], required: true },
+  type: { type: String, required: true },
 }, { collection: 'attachments' });
 
 const AttachmentModel = mongoose.model('attachments', AttachmentsSchema);
