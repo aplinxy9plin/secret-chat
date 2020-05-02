@@ -134,7 +134,7 @@ controller.sendMessage = async (socket, data, emitName) => {
       thisChatSocketsId.forEach((socketId) => {
         global.io.sockets.connected[socketId].emit('newMessage', {
           type: 'message',
-          result: data.message,
+          result: newMessage,
         });
       });
     } catch (err) {
@@ -224,24 +224,37 @@ controller.userLeftChat = async (socket, data, emitName) => {
   } else {
     try {
       const userLeftChatResult = await Chat.userLeftChat(data.chatId, data.vk_user_id);
-      logger.info('Messages set visible false...');
       socket.emit('userLeftChat', {
         type: 'success',
         result: userLeftChatResult,
       });
+      // Удаление сообщений
+      const usersState = await Chat.getUsersState(data.chatId);
+
+      const companionVkId = usersState.map((userState) => {
+        if (userState.userId !== data.vk_user_id) {
+          return userState.userId;
+        }
+        return null;
+      });
+
+      if (companionVkId) {
+        logger.info('Messages setting visible false...');
+        await Chat.removeUserMessages(data.chatId, companionVkId);
+      }
     } catch (err) {
       logger.error(`Error in user left chat- ${err}`);
       socket.emit(emitName, {
         type: 'error with userLeftChat',
       });
     }
+    // Архивирование чата
     try {
       const usersState = await Chat.getUsersState(data.chatId);
       const isUsersDisconnected = !usersState.users.filter((item) => item.socketId !== SOCKET_ID_NULL).lenght > 0;
       let messages = await Chat.getMessages(data.chatId);
       messages = messages.messages;
       const isAllMessagesNotVisible = !messages.filter((item) => item.visible === true).length > 0;
-
       if (isUsersDisconnected && isAllMessagesNotVisible) {
         if (messages.length !== 0) {
           const messagesToAdd = messagesToArchiveType(messages);
@@ -280,7 +293,7 @@ controller.userConnectedToChat = async (socket, data, emitName) => {
   } else {
     try {
       const userConnectedResult = await Chat.userConnectedToChat(data.chatId, data.vk_user_id, socket.id);
-      logger.info('Messages set visible false...');
+
       socket.emit('userConnectedToChat', {
         type: 'success',
         result: userConnectedResult,
